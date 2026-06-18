@@ -691,20 +691,22 @@
     };
 
     try {
-      const response = await fetch(POWER_AUTOMATE_URL, {
+      // Mode no-cors : le navigateur ne peut pas lire la réponse d'un autre
+      // domaine (Power Automate). On envoie la requête ; si elle part sans
+      // erreur réseau, on considère l'envoi réussi. La liste SharePoint
+      // reste la source de vérité de l'enregistrement.
+      await fetch(POWER_AUTOMATE_URL, {
         method: 'POST',
+        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (response.ok || response.status === 202) {
-        document.getElementById('questionnaireForm').style.display = 'none';
-        const t = i18n[currentLang];
-        document.getElementById('msgSuccessText').textContent = t.msgSuccess;
-        document.getElementById('msgSuccess').className = 'msg success';
-      } else {
-        throw new Error('HTTP ' + response.status);
-      }
+      document.getElementById('questionnaireForm').style.display = 'none';
+      const t = i18n[currentLang];
+      document.getElementById('msgSuccessText').textContent = t.msgSuccess;
+      document.getElementById('msgSuccess').className = 'msg success';
     } catch(err) {
+      // N'arrive qu'en cas de véritable échec d'envoi (pas de réseau, etc.)
       const t = i18n[currentLang];
       document.getElementById('msgErrorText').textContent = t.msgError;
       document.getElementById('msgError').className = 'msg error';
