@@ -657,7 +657,7 @@
     btn.disabled = true;
     btn.textContent = currentLang === 'FR' ? 'Envoi en cours...' : 'Submitting...';
     document.getElementById('msgSuccess').className = 'msg';
-    document.getElementById('msgError').className = 'msg error';
+    document.getElementById('msgError').className = 'msg';
 
     const payload = {
       langue: document.getElementById('langue').value,
@@ -723,6 +723,7 @@
   });
 
   function showSuccess() {
+    document.getElementById('msgError').className = 'msg';
     document.getElementById('questionnaireForm').style.display = 'none';
     const t = i18n[currentLang];
     document.getElementById('msgSuccessText').textContent = t.msgSuccess;
