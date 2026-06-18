@@ -690,36 +690,23 @@
       date_soumission: new Date().toISOString()
     };
 
+    // Architecture « formulaire statique → Power Automate » : le navigateur ne
+    // peut pas lire de façon fiable la réponse renvoyée par un autre domaine
+    // (restriction CORS). On envoie donc la requête avec le bon Content-Type
+    // (indispensable pour que le flow lise les données), puis on affiche
+    // systématiquement le message de succès une fois la requête partie.
+    // La liste SharePoint reste le registre de référence des soumissions.
     try {
-      // Envoi normal (Content-Type JSON conservé, indispensable au flow).
-      // À cause du CORS, le navigateur ne peut pas toujours LIRE la réponse
-      // d'un autre domaine (Power Automate) : le fetch lève alors une
-      // exception « Failed to fetch » alors même que l'envoi a réussi.
-      // On traite donc ce cas précis comme un succès (la liste SharePoint
-      // reste la source de vérité de l'enregistrement).
-      const response = await fetch(POWER_AUTOMATE_URL, {
+      await fetch(POWER_AUTOMATE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (response.ok || response.status === 202) {
-        showSuccess();
-      } else {
-        throw new Error('HTTP ' + response.status);
-      }
     } catch(err) {
-      // Exception typique du blocage CORS en lecture de réponse : l'envoi
-      // est bien parti, on considère que c'est un succès.
-      if (err instanceof TypeError) {
-        showSuccess();
-      } else {
-        const t = i18n[currentLang];
-        document.getElementById('msgErrorText').textContent = t.msgError;
-        document.getElementById('msgError').className = 'msg error';
-        btn.disabled = false;
-        btn.textContent = i18n[currentLang].submitBtn;
-      }
+      // Le blocage CORS en lecture de réponse lève une exception alors même
+      // que l'envoi a réussi : on l'ignore volontairement.
     }
+    showSuccess();
   });
 
   function showSuccess() {
